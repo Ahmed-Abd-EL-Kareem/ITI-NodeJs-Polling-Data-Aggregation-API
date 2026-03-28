@@ -1,6 +1,11 @@
 const jwt = require('jsonwebtoken')
-const catchAsync = require('express-async-handler');
 const User = require('../user/user.model');
+const path = require('path')
+const ejs = require('ejs');
+const { sendEmail } = require('../config/mail');
+const catchAsync = require('../utils/catchAsync');
+const { forgotPassword } = require('./forget-password.service');
+const { resetPassword } = require('./reset-password');
 const signToken = (id, email, secret) => {
   return jwt.sign({ id, email }, secret, {
     expiresIn: process.env.JWT_EXPIRES_IN
@@ -27,6 +32,26 @@ exports.register = catchAsync(async (req, res, next) => {
   }
   const token = signToken(user.id, user.email, process.env.JWT_SECRET)
   const refreshToken = signRefreshToken(user.id, user.email, process.env.JWT_REFRESH_TOKEN)
+
+  const templatePath = path.join(
+    __dirname,
+    '../../view/welcome.ejs'
+  );
+
+  const html = await ejs.renderFile(templatePath, {
+    name: user.name,
+    appUrl: process.env.BASE_URL,
+  });
+
+  try {
+    await sendEmail({
+      to: user.email,
+      subject: 'Welcome to Our Platform 🎉',
+      html,
+    });
+  } catch (err) {
+    console.error('Email failed:', err.message);
+  }
   res.status(201).json({
     status: 'success',
     data: {
@@ -39,7 +64,6 @@ exports.register = catchAsync(async (req, res, next) => {
 
 exports.login = catchAsync(async (req, res, next) => {
   const { email, password } = req.body;
-  console.log(email, password);
 
   if (!email || !password) {
     return res.status(400).json({
@@ -70,5 +94,24 @@ exports.login = catchAsync(async (req, res, next) => {
     token,
     refreshToken,
     data: { user }
+  })
+})
+
+
+exports.forgotUserPassword = catchAsync(async (req, res) => {
+  await forgotPassword(req.body.email)
+  res.status(200).json({
+    status: 'success',
+    message: 'Reset email sent',
+  })
+});
+exports.resetUserPassword = catchAsync(async (req, res) => {
+
+  await resetPassword(req.params.token, req.body.password);
+
+
+  res.status(200).json({
+    status: 'success',
+    message: 'Password updated',
   })
 })

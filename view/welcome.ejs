@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Welcome</title>
+  </head>
+
+  <body style="margin: 0; padding: 0; background-color: #f4f6f8">
+    <table width="100%" cellpadding="0" cellspacing="0">
+      <tr>
+        <td align="center">
+          <!-- Container -->
+          <table
+            width="100%"
+            style="
+              max-width: 600px;
+              background: #ffffff;
+              margin-top: 40px;
+              border-radius: 10px;
+              overflow: hidden;
+              font-family: Arial, sans-serif;
+            "
+          >
+            <!-- Header -->
+            <tr>
+              <td
+                style="
+                  background: linear-gradient(135deg, #10b981, #059669);
+                  padding: 30px;
+                  text-align: center;
+                  color: white;
+                "
+              >
+                <h1 style="margin: 0; font-size: 24px">
+                  🎉 Welcome to Our Platform!
+                </h1>
+              </td>
+            </tr>
+
+            <!-- Body -->
+            <tr>
+              <td style="padding: 30px; color: #333">
+                <p style="font-size: 16px">
+                  Hello <strong><%= name %></strong>,
+                </p>
+
+                <p style="font-size: 15px; line-height: 1.6">
+                  We're excited to have you on board! Your account has been
+                  successfully created and you're now part of our community.
+                </p>
+
+                <p style="font-size: 15px; line-height: 1.6">
+                  You can now start exploring, creating polls, and engaging with
+                  others.
+                </p>
+
+                <!-- Button -->
+                <table width="100%" style="margin: 30px 0">
+                  <tr>
+                    <td align="center">
+                      <a
+                        href="<%= appUrl %>"
+                        style="
+                          background: #10b981;
+                          color: #ffffff;
+                          padding: 14px 28px;
+                          text-decoration: none;
+                          border-radius: 6px;
+                          font-size: 16px;
+                          display: inline-block;
+                        "
+                      >
+                        Get Started
+                      </a>
+                    </td>
+                  </tr>
+                </table>
+
+                <p style="font-size: 14px; color: #666">
+                  If you have any questions, feel free to contact our support
+                  team anytime.
+                </p>
+
+                <p style="font-size: 14px; color: #999">
+                  Enjoy your journey 🚀
+                </p>
+              </td>
+            </tr>
+
+            <!-- Footer -->
+            <tr>
+              <td
+                style="
+                  background: #f9fafb;
+                  padding: 20px;
+                  text-align: center;
+                  font-size: 12px;
+                  color: #999;
+                "
+              >
+                © <%= new Date().getFullYear() %> Your App. All rights reserved.
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>

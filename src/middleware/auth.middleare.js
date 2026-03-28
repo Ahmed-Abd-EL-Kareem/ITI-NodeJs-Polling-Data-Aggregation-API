@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken')
 const User = require('../user/user.model')
+const catchAsync = require('../utils/catchAsync')
 
-const catchAsync = require('catch-async-wrapper-express').default
 
 exports.protect = catchAsync(async (req, res, next) => {
   const token = req.cookies.jwt
@@ -26,7 +26,6 @@ exports.protect = catchAsync(async (req, res, next) => {
 
 exports.restrictTo = (...roles) => {
   return (req, res, next) => {
-    console.log(roles, (req.user.role).toString());
     if (!roles.includes(req.user.role)) {
       return res.status(403).json({
         status: 'fail',
@@ -36,3 +35,4 @@ exports.restrictTo = (...roles) => {
     next();
   }
 }
+

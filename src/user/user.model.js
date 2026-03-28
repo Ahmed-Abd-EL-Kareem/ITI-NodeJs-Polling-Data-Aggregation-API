@@ -1,6 +1,7 @@
 const mongoose = require('mongoose')
 const validator = require('validator')
 const bcrypt = require('bcrypt')
+
 const userSchema = mongoose.Schema({
   name: {
     type: String,
@@ -14,7 +15,20 @@ const userSchema = mongoose.Schema({
   },
   password: {
     type: String,
-    validate: [validator.isStrongPassword, "The Password Is Week, Pleas Enter Strong one That Have (8 Length Character, 1 UpperCase, 1 LowerCase, 1 Symbol, numbers"],
+    validate: {
+      validator: function (val) {
+        return validator.isStrongPassword(val, {
+          minLength: 8,
+          minLowercase: 1,
+          minUppercase: 1,
+          minNumbers: 1,
+          minSymbols: 1,
+        });
+      },
+      message:
+        'Password must contain uppercase, lowercase, number and symbol',
+    },
+    minlength: 8,
     required: [true, "User Must Have Password"],
     select: false,
   },
@@ -23,8 +37,10 @@ const userSchema = mongoose.Schema({
     enum: ['user', 'admin'],
     default: 'user'
   },
-  CreatedAt: Date,
+  resetPasswordToken: String,
+  resetPasswordExpires: Date,
   passwordChangedAt: Date,
+  CreatedAt: Date,
 
 },
   {

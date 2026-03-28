@@ -1,4 +1,4 @@
-const catchAsync = require('catch-async-wrapper-express').default
+const catchAsync = require('../utils/catchAsync')
 const User = require('./user.model')
 
 exports.getAllUsers = catchAsync(async (req, res) => {
