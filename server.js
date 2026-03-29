@@ -1,5 +1,7 @@
+//const dns = require("dns")
+//dns.setServers(["8.8.8.8","8.8.4.4"])
 const dotenv = require('dotenv')
-dotenv.config({ path: './.development.env' })
+dotenv.config()
 const mongoose = require('mongoose')
 const app = require('./app')
 
