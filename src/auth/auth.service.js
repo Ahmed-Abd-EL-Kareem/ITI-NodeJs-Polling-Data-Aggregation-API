@@ -6,6 +6,7 @@ const { sendEmail } = require('../config/mail');
 const catchAsync = require('../utils/catchAsync');
 const { forgotPassword } = require('./forget-password.service');
 const { resetPassword } = require('./reset-password');
+const sendMailTrap = require('../config/mail');
 const signToken = (id, email, secret) => {
   return jwt.sign({ id, email }, secret, {
     expiresIn: process.env.JWT_EXPIRES_IN
@@ -44,7 +45,12 @@ exports.register = catchAsync(async (req, res, next) => {
   });
 
   try {
-    await sendEmail({
+    // await sendEmail({
+    //   to: user.email,
+    //   subject: 'Welcome to Our Platform 🎉',
+    //   html,
+    // });
+    await sendMailTrap({
       to: user.email,
       subject: 'Welcome to Our Platform 🎉',
       html,
@@ -106,12 +112,28 @@ exports.forgotUserPassword = catchAsync(async (req, res) => {
   })
 });
 exports.resetUserPassword = catchAsync(async (req, res) => {
-
   await resetPassword(req.params.token, req.body.password);
-
 
   res.status(200).json({
     status: 'success',
     message: 'Password updated',
   })
 })
+
+exports.googleCallback = (req, res) => {
+  const user = req.user;
+
+  const token = signToken(user.id, user.email, process.env.JWT_SECRET);
+  const refreshToken = signRefreshToken(
+    user.id,
+    user.email,
+    process.env.JWT_REFRESH_TOKEN
+  );
+
+  res.status(200).json({
+    status: 'success',
+    token,
+    refreshToken,
+    data: { user }
+  });
+};

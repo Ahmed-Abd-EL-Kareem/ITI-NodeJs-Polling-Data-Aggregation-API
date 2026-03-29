@@ -5,6 +5,7 @@ const morgan = require('morgan')
 const userRouter = require('./src/user/user.routes.js')
 const cookieParser = require('cookie-parser')
 const AppError = require('./src/utils/appError.js')
+const globalErrorHandler = require("./src/middleware/global-error-handling.js")
 
 const app = express()
 
@@ -22,4 +23,6 @@ app.use('/api/v1/users', userRouter)
 app.use(/.*/, (req, res, next) => {
   next(new AppError(`Can't find ${req.originalUrl} on this server`, 404));
 });
+
+app.use(globalErrorHandler)
 module.exports = app
