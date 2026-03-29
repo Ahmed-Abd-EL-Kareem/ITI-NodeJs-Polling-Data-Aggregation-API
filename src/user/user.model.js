@@ -29,7 +29,7 @@ const userSchema = mongoose.Schema({
         'Password must contain uppercase, lowercase, number and symbol',
     },
     minlength: 8,
-    required: [true, "User Must Have Password"],
+    // required: [true, "User Must Have Password"],
     select: false,
   },
   role: {
@@ -37,6 +37,12 @@ const userSchema = mongoose.Schema({
     enum: ['user', 'admin'],
     default: 'user'
   },
+  provider: {
+    type: String,
+    enum: ['local', 'google'],
+    default: 'local'
+  },
+  googleId: String,
   resetPasswordToken: String,
   resetPasswordExpires: Date,
   passwordChangedAt: Date,
