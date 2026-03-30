@@ -3,6 +3,7 @@ const cors = require('cors')
 const helmet = require('helmet')
 const morgan = require('morgan')
 const userRouter = require('./src/user/user.routes.js')
+const optionRouter = require('./src/options/options.route.js' )
 const cookieParser = require('cookie-parser')
 const AppError = require('./src/utils/appError.js')
 const globalErrorHandler = require("./src/middleware/global-error-handling.js")
@@ -20,6 +21,8 @@ app.use(helmet())
 app.use(cookieParser());
 //! Routes 
 app.use('/api/v1/users', userRouter)
+app.use('/api/v1/options', optionRouter)
+
 app.use(/.*/, (req, res, next) => {
   next(new AppError(`Can't find ${req.originalUrl} on this server`, 404));
 });
