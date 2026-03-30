@@ -12,7 +12,10 @@ const globalErrorHandler = require("./src/middleware/global-error-handling.js")
 const app = express()
 
 //! Middleware
-
+console.log(process.env.NODE_ENV);
+if (process.env.NODE_ENV.trim() === "development") {
+  app.use(morgan("dev"));
+}
 app.use(cors())
 app.use(express.json())
 app.use(helmet())
