@@ -6,15 +6,15 @@ exports.getAllUsers = catchAsync(async (req, res) => {
   res.json({ status: 'success', count: users.length, data: users })
 })
 
-// exports.getUserById = catchAsync(async (req, res) => {
-//   const id = req.params.id
-//   const user = await User.findById(id)
-//   if (!user) {
-//     res.status(404).json({ status: 'fail', error: 'User not found 3' })
-//     return
-//   }
-//   res.json({ status: 'success', data: user })
-// })
+exports.getUserById = catchAsync(async (req, res) => {
+  const id = req.params.id
+  const user = await User.findById(id)
+  if (!user) {
+    res.status(404).json({ status: 'fail', error: 'User not found 3' })
+    return
+  }
+  res.json({ status: 'success', data: user })
+})
 
 exports.updateUser = catchAsync(async (req, res) => {
   const id = req.params.id
