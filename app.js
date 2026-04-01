@@ -10,7 +10,6 @@ const cookieParser = require('cookie-parser')
 const AppError = require('./src/utils/appError.js')
 const globalErrorHandler = require("./src/middleware/global-error-handling.js")
 const resultsRoute = require("./src/results/result.routes.js")
-// const resultRoutes = require('./results/result.routes.js'); 
 
 const app = express()
 
