@@ -9,6 +9,8 @@ const optionRouter = require('./src/options/options.route.js' )
 const cookieParser = require('cookie-parser')
 const AppError = require('./src/utils/appError.js')
 const globalErrorHandler = require("./src/middleware/global-error-handling.js")
+const resultsRoute = require("./src/results/result.routes.js")
+// const resultRoutes = require('./results/result.routes.js'); 
 
 const app = express()
 
@@ -26,6 +28,7 @@ app.use('/api/v1/users', userRouter)
 app.use('/api/v1/polls', pollRouter)
 app.use('/api/v1/options', optionRouter)
 app.use('/api/v1/votes', votesRouter)
+app.use('/api/v1/results',resultsRoute)
 
 app.use(/.*/, (req, res, next) => {
   next(new AppError(`Can't find ${req.originalUrl} on this server`, 404));

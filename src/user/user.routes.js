@@ -27,5 +27,5 @@ router.post('/reset-password/:token', resetUserPassword)
 
 router.use(protect)
 router.route('/').get(restrictTo('admin'), getAllUsers).delete(restrictTo('admin', deleteUser))
-router.route('/:id').get(getUserById).patch(updateUser)
+//router.route('/:id').get(getUserById).patch(updateUser)
 module.exports = router

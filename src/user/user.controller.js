@@ -6,15 +6,15 @@ exports.getAllUsers = catchAsync(async (req, res) => {
   res.json({ status: 'success', count: users.length, data: users })
 })
 
-exports.getUserById = catchAsync(async (req, res) => {
-  const id = req.params.id
-  const user = await User.findById(id)
-  if (!user) {
-    res.status(404).json({ status: 'fail', error: 'User not found' })
-    return
-  }
-  res.json({ status: 'success', data: user })
-})
+// exports.getUserById = catchAsync(async (req, res) => {
+//   const id = req.params.id
+//   const user = await User.findById(id)
+//   if (!user) {
+//     res.status(404).json({ status: 'fail', error: 'User not found 3' })
+//     return
+//   }
+//   res.json({ status: 'success', data: user })
+// })
 
 exports.updateUser = catchAsync(async (req, res) => {
   const id = req.params.id
@@ -23,7 +23,7 @@ exports.updateUser = catchAsync(async (req, res) => {
     updatedAt: Date.now()
   }, { returnDocument: 'after', runValidators: true })
   if (!user) {
-    return res.status(404).json({ status: 'fail', error: 'User not found' })
+    return res.status(404).json({ status: 'fail', error: 'User not found 2' })
 
   }
   res.json({ status: 'success', data: user })
@@ -33,7 +33,7 @@ exports.deleteUser = catchAsync(async (req, res) => {
   const id = req.params.id
   const user = await User.findByIdAndDelete(id)
   if (!user) {
-    return res.status(404).json({ status: 'fail', error: 'User not found' })
+    return res.status(404).json({ status: 'fail', error: 'User not found 1' })
 
   }
   res.json({ status: 'success', data: user })
