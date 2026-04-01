@@ -4,8 +4,6 @@ const catchAsync = require('../utils/catchAsync')
 
 
 exports.protect = catchAsync(async (req, res, next) => {
-  console.log('protect');
-  
   const token = req.cookies.jwt
   if (!token) {
     return res.status(401).json({
