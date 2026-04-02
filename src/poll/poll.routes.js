@@ -1,5 +1,5 @@
 const express = require('express');
-const {protect} = require('../middleware/auth.middleare.js');
+const { protect, restrictTo } = require('../middleware/auth.middleware.js');
 
 const {
   createPoll,
@@ -14,7 +14,7 @@ const router = express.Router();
 router.post('/', protect, createPoll);
 router.get('/', getPolls);
 router.get('/:id', getPoll);
-router.patch('/:id', protect,updatePoll);
-router.delete('/:id', protect ,deletePoll);
+router.patch('/:id', protect, updatePoll);
+router.delete('/:id', protect, restrictTo('admin'), deletePoll);
 
 module.exports = router;

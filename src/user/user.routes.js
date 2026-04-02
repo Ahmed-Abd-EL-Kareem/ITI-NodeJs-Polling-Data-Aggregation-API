@@ -1,6 +1,6 @@
 const express = require('express');
 const { register, login, forgotUserPassword, resetUserPassword, googleCallback } = require('../auth/auth.service');
-const { protect, restrictTo } = require('../middleware/auth.middleare');
+const { protect, restrictTo } = require('../middleware/auth.middleware');
 const { getAllUsers, deleteUser, getUserById, updateUser } = require('./user.controller');
 
 const passport = require('../auth/passport');

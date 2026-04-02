@@ -5,11 +5,11 @@ const {
   createOption,
   getOptionsByPollId,
 } = require("./options.controller");
-
+const { protect } = require("../middleware/auth.middleware");
 // POST /options
-router.post("/", createOption);
+router.post("/", protect, createOption);
 
 // GET /options/:pollId
-router.get("/:pollId", getOptionsByPollId);
+router.get("/:pollId", protect, getOptionsByPollId);
 
 module.exports = router;

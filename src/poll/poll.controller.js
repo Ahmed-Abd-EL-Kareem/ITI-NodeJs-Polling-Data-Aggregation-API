@@ -3,7 +3,7 @@ const catchAsync = require("../utils/catchAsync.js");
 
 // Get all polls
 const getPolls = catchAsync(async (req, res, next) => {
-  const polls = await Poll.find();
+  const polls = await Poll.find().populate("createdBy");
 
   res.json({
     message: "success",
@@ -20,7 +20,7 @@ const createPoll = catchAsync(async (req, res, next) => {
     description,
     expiresAt,
     createdBy: req.user?._id // لو protect شغال
-  });
+  }).populate("createdBy");
 
   res.status(201).json({
     message: "Poll created",
@@ -30,7 +30,7 @@ const createPoll = catchAsync(async (req, res, next) => {
 
 // Get single poll
 const getPoll = catchAsync(async (req, res, next) => {
-  const poll = await Poll.findById(req.params.id);
+  const poll = await Poll.findById(req.params.id).populate("createdBy");
 
   if (!poll) {
     return next(new Error("Poll not found"));
@@ -48,7 +48,7 @@ const updatePoll = catchAsync(async (req, res, next) => {
     req.params.id,
     req.body,
     { new: true }
-  );
+  ).populate("createdBy");
 
   if (!poll) {
     return next(new Error("Poll not found"));

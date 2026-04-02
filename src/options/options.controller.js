@@ -30,7 +30,7 @@ const getOptionsByPollId = async (req, res) => {
   try {
     const { pollId } = req.params;
 
-    const options = await Option.find({ pollId });
+    const options = await Option.find({ pollId }).populate("pollId");
 
     res.status(200).json({
       results: options.length,

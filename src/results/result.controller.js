@@ -1,13 +1,9 @@
-const  Poll = require("../poll/poll.model.js")
+const Poll = require("../poll/poll.model.js")
 const Option = require("../options/options.model.js");
 const Vote = require("../votes/votes.model.js");
 
- exports.getResults = async (req, res) => {
-  console.log('1');
-  
+exports.getResults = async (req, res) => {
   try {
-    const pollId = req.params.pollId;
-
     // >>> total polls >>>
     const totalPolls = await Poll.countDocuments();
 
@@ -16,8 +12,10 @@ const Vote = require("../votes/votes.model.js");
 
     // >>> aggregation: find the poll with the highest number of votes 
     const mostPopularPollAgg = await Vote.aggregate([
-      { $group: 
-        { _id: "$pollId", votes: { $sum: 1 } } },
+      {
+        $group:
+          { _id: "$pollId", votes: { $sum: 1 } }
+      },
       { $sort: { votes: -1 } },
       { $limit: 1 }
     ]);
@@ -34,8 +32,10 @@ const Vote = require("../votes/votes.model.js");
 
     //  aggregation: find the option with the highest number of votes
     const mostVotedOptionAgg = await Vote.aggregate([
-      { $group:
-         { _id: "$optionId", votes: { $sum: 1 } } },
+      {
+        $group:
+          { _id: "$optionId", votes: { $sum: 1 } }
+      },
       { $sort: { votes: -1 } },
       { $limit: 1 }
     ]);
@@ -112,6 +112,3 @@ exports.getPollResults = async (req, res) => {
     res.status(500).json({ status: "error", message: "Server error" });
   }
 };
-
-// module.exports = getPollResults;
-// module.exports = getResults; 
