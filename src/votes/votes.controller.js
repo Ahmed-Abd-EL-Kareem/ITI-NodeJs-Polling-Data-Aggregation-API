@@ -22,9 +22,10 @@ const getSingleVote = catchAsync(async (req, res, next) => {
   res.json({ status: "success", data: singleVote });
 });
 const createVote = catchAsync(async (req, res) => {
+  const { id } = req.params;
   const { userId, pollId, optionId } = req.body;
   const newVote = await vote.create({ userId, pollId, optionId });
-  const votesIncrement = await optionModel.findByIdAndUpdate(id, votesCount++)
+  await optionModel.findByIdAndUpdate(id, { $inc: { votesCount: 1 } })
   res.status(201).json({ status: "success", data: newVote });
 })
 
@@ -45,7 +46,7 @@ const updatedVote = catchAsync(async (req, res, next) => {
 const deletedVote = catchAsync(async (req, res, next) => {
   const { id } = req.params;
   const deletedVote = await vote.findByIdAndDelete(id);
-  const votesIncrement = await optionModel.findByIdAndUpdate(id, votesCount--)
+  await optionModel.findByIdAndUpdate(id, { $inc: { votesCount: -1 } })
   if (!deletedVote) {
     const error = new AppError("No vote was found with that id", 404);
     return next(error);
