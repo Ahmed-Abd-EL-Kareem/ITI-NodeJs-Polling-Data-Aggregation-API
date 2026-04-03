@@ -2,11 +2,10 @@ const jwt = require('jsonwebtoken')
 const User = require('../user/user.model');
 const path = require('path')
 const ejs = require('ejs');
-const { sendEmail } = require('../config/mail');
+const { sendEmail, sendMailTrap } = require('../config/mail');
 const catchAsync = require('../utils/catchAsync');
 const { forgotPassword } = require('./forget-password.service');
 const { resetPassword } = require('./reset-password');
-const sendMailTrap = require('../config/mail');
 const signToken = (id, email, secret) => {
   return jwt.sign({ id, email }, secret, {
     expiresIn: process.env.JWT_EXPIRES_IN
@@ -23,7 +22,8 @@ exports.register = catchAsync(async (req, res, next) => {
     name: req.body.name,
     email: req.body.email,
     password: req.body.password,
-    role: req.body.role
+    // Prevent privilege escalation: registration always creates a normal user.
+    role: "user",
   });
   if (!user) {
     return res.status(500).json({

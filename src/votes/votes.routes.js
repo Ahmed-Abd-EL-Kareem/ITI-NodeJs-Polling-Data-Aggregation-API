@@ -9,7 +9,7 @@ const { getAllVotes,
     deletedVote
 } = require('./votes.controller');
 votesRouter.route('/')
-    .get(protect, getAllVotes)
+    .get(getAllVotes)
     .post(protect, restrictTo('user', 'admin'), createVote)
 votesRouter.route('/:id')
     .get(protect, getSingleVote)

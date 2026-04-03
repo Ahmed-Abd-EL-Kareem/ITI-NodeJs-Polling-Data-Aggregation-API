@@ -37,4 +37,5 @@ const sendMailTrap = async ({ to, subject, html }) => {
 
   await transporter.sendMail(mailOptions)
 }
-module.exports = sendMailTrap;
+
+module.exports = { sendEmail: exports.sendEmail, sendMailTrap }

@@ -4,6 +4,7 @@ const { protect, restrictTo } = require('../middleware/auth.middleware');
 const { getAllUsers, deleteUser, getUserById, updateUser } = require('./user.controller');
 
 const passport = require('../auth/passport');
+const { authLimiter } = require('../middleware/rate-limit.middleware');
 
 const router = express.Router();
 
@@ -20,12 +21,12 @@ router.get(
   googleCallback
 );
 
-router.post('/register', register)
-router.post('/login', login)
-router.post('/forgot-password', forgotUserPassword)
-router.post('/reset-password/:token', resetUserPassword)
+router.post('/register', authLimiter, register)
+router.post('/login', authLimiter, login)
+router.post('/forgot-password', authLimiter, forgotUserPassword)
+router.post('/reset-password/:token', authLimiter, resetUserPassword)
 
 router.use(protect)
-router.route('/').get(restrictTo('admin'), getAllUsers).delete(restrictTo('admin', deleteUser))
+router.route('/').get(restrictTo('admin'), getAllUsers).delete(restrictTo('admin'), deleteUser)
 router.route('/:id').get(getUserById).patch(updateUser)
 module.exports = router

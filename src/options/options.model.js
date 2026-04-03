@@ -20,5 +20,6 @@ const optionSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+optionSchema.index({ pollId: 1 });
+
 module.exports = mongoose.model("Option", optionSchema);
-//c

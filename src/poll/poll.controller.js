@@ -1,5 +1,6 @@
 const Poll = require("./poll.model.js");
 const catchAsync = require("../utils/catchAsync.js");
+const AppError = require("../utils/appError.js");
 
 // Get all polls
 const getPolls = catchAsync(async (req, res, next) => {
@@ -33,7 +34,7 @@ const getPoll = catchAsync(async (req, res, next) => {
   const poll = await Poll.findById(req.params.id).populate("createdBy");
 
   if (!poll) {
-    return next(new Error("Poll not found"));
+    return next(new AppError("Poll not found", 404));
   }
 
   res.json({
@@ -44,15 +45,22 @@ const getPoll = catchAsync(async (req, res, next) => {
 
 // Update poll
 const updatePoll = catchAsync(async (req, res, next) => {
+  const existing = await Poll.findById(req.params.id);
+  if (!existing) {
+    return next(new AppError("Poll not found", 404));
+  }
+  if (
+    req.user.role !== "admin" &&
+    existing.createdBy.toString() !== req.user._id.toString()
+  ) {
+    return next(new AppError("You can only update your own polls", 403));
+  }
+
   const poll = await Poll.findByIdAndUpdate(
     req.params.id,
     req.body,
-    { new: true }
+    { new: true, runValidators: true }
   ).populate("createdBy");
-
-  if (!poll) {
-    return next(new Error("Poll not found"));
-  }
 
   res.json({
     message: "updated",
@@ -60,12 +68,12 @@ const updatePoll = catchAsync(async (req, res, next) => {
   });
 });
 
-// Delete poll
+// Delete poll (route: admin-only)
 const deletePoll = catchAsync(async (req, res, next) => {
   const poll = await Poll.findByIdAndDelete(req.params.id);
 
   if (!poll) {
-    return next(new Error("Poll not found"));
+    return next(new AppError("Poll not found", 404));
   }
 
   res.json({

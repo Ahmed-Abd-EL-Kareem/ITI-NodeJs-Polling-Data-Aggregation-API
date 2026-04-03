@@ -8,7 +8,7 @@ mongoose.connect(process.env.DATABASE_URL).then(() =>
 ).catch((err) => console.log(console.error('Error connecting to MongoDB:🤦‍♂️🤦‍♂️🤦‍♂️', err))
 )
 
-const port = process.envPORT || 3000
+const port = process.env.PORT || 3000
 app.listen(port, () => {
   console.log(`App Is Running on http://localhost:${port}!!!😁😁😁`);
 })

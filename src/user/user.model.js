@@ -7,6 +7,18 @@ const userSchema = mongoose.Schema({
     type: String,
     required: [true, "User Must Have Name"],
   },
+  // Cloudinary will upload the image on the frontend; backend only stores the resulting URL.
+  image: {
+    type: String,
+    default: "https://i.pinimg.com/736x/d9/7b/bb/d97bbb08017ac2309307f0822e63d082.jpg",
+    validate: {
+      validator: function (v) {
+        if (v === null || v === undefined || v === "") return true;
+        return validator.isURL(v, { require_protocol: true });
+      },
+      message: "Invalid image url",
+    },
+  },
   email: {
     type: String,
     required: [true, "User Must Have Email"],
