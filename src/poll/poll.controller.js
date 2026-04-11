@@ -1,13 +1,26 @@
 const Poll = require("./poll.model.js");
 const catchAsync = require("../utils/catchAsync.js");
 const AppError = require("../utils/appError.js");
+const APIFeatures = require("../utils/apiFeature.js");
 
 // Get all polls
 const getPolls = catchAsync(async (req, res, next) => {
-  const polls = await Poll.find().populate("createdBy");
+  const features = new APIFeatures(Poll.find(), req.query)
+    .filter()
+    .search(["title", "description"])
+    .sort()
+    .limitFields()
+    .paginate();
+
+  const polls = await features.query.populate("createdBy");
+  const total = await features.countDocuments();
 
   res.json({
     message: "success",
+    count: polls.length,
+    total,
+    page: features.page,
+    totalPages: Math.ceil(total / features.limit),
     data: polls
   });
 });
@@ -21,7 +34,8 @@ const createPoll = catchAsync(async (req, res, next) => {
     description,
     expiresAt,
     createdBy: req.user?._id // لو protect شغال
-  }).populate("createdBy");
+  });
+  await poll.populate("createdBy");
 
   res.status(201).json({
     message: "Poll created",
@@ -68,13 +82,20 @@ const updatePoll = catchAsync(async (req, res, next) => {
   });
 });
 
-// Delete poll (route: admin-only)
+// Delete poll
 const deletePoll = catchAsync(async (req, res, next) => {
-  const poll = await Poll.findByIdAndDelete(req.params.id);
-
-  if (!poll) {
+  const existing = await Poll.findById(req.params.id);
+  if (!existing) {
     return next(new AppError("Poll not found", 404));
   }
+  if (
+    req.user.role !== "admin" &&
+    existing.createdBy.toString() !== req.user._id.toString()
+  ) {
+    return next(new AppError("You can only delete your own polls", 403));
+  }
+
+  await Poll.findByIdAndDelete(req.params.id);
 
   res.json({
     message: "deleted"

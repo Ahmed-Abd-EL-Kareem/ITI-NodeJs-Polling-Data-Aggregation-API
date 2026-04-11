@@ -4,7 +4,11 @@ const catchAsync = require('../utils/catchAsync')
 
 
 exports.protect = catchAsync(async (req, res, next) => {
-  const token = req.cookies.jwt
+  let token = req.cookies?.jwt
+  const authHeader = req.headers.authorization
+  if (!token && typeof authHeader === 'string' && authHeader.startsWith('Bearer ')) {
+    token = authHeader.slice(7).trim()
+  }
   if (!token) {
     return res.status(401).json({
       status: 'fail',

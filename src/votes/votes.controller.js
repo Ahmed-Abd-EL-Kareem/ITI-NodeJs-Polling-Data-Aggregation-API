@@ -5,13 +5,29 @@ const AppError = require("../utils/appError.js");
 const Option = require("../options/options.model.js");
 const Poll = require("../poll/poll.model.js");
 const PollResult = require("../results/poll-results.model.js");
+const APIFeatures = require("../utils/apiFeature.js");
 
 const getAllVotes = catchAsync(async (req, res) => {
-  const votes = await Vote.find({}, { __v: false })
+  const features = new APIFeatures(Vote.find({}, { __v: false }), req.query)
+    .filter()
+    .search(["userId", "pollId", "optionId"])
+    .sort()
+    .limitFields()
+    .paginate()
+
+  const votes = await features.query
     .populate({ path: "userId", select: "name" })
     .populate({ path: "pollId", select: "title" })
     .populate({ path: "optionId", select: "text" });
-  res.json({ status: "success", data: votes });
+  const total = await features.countDocuments();
+  res.json({
+    status: "success",
+    count: votes.length,
+    total,
+    page: features.page,
+    totalPages: Math.ceil(total / features.limit),
+    data: votes
+  });
 });
 
 const getSingleVote = catchAsync(async (req, res, next) => {
@@ -51,10 +67,16 @@ const createVote = catchAsync(async (req, res, next) => {
     return next(new AppError("Option does not belong to this poll", 400));
   }
 
+  // Check if user has already voted for this poll
+  const existingVote = await Vote.findOne({ userId, pollId });
+  if (existingVote) {
+    return next(new AppError("You have already voted for this poll", 400));
+  }
+
   const session = await mongoose.startSession();
   session.startTransaction();
   try {
-    await Vote.create({ userId, pollId, optionId }, { session });
+    await Vote.create([{ userId, pollId, optionId }], { session });
     await Option.findByIdAndUpdate(
       optionId,
       { $inc: { votesCount: 1 } },

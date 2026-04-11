@@ -120,6 +120,8 @@ exports.resetUserPassword = catchAsync(async (req, res) => {
   })
 })
 
+const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
+
 exports.googleCallback = (req, res) => {
   const user = req.user;
 
@@ -129,11 +131,27 @@ exports.googleCallback = (req, res) => {
     user.email,
     process.env.JWT_REFRESH_TOKEN
   );
+  const cookieOptions = {
+    expires: new Date(
+      Date.now() + 2 * 24 * 60 * 60 * 1000
+    ),
+    httpOnly: true,
+    secure: true,
+    sameSite: "None"
+  }
+  const redirectUrl = new URL(FRONTEND_URL);
+  redirectUrl.searchParams.set('token', token);
+  redirectUrl.searchParams.set(
+    'user',
+    JSON.stringify({
+      id: user.id || user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      image: user.image,
+    })
+  );
 
-  res.status(200).json({
-    status: 'success',
-    token,
-    refreshToken,
-    data: { user }
-  });
+  res.cookie('jwt', token, cookieOptions);
+  res.redirect(redirectUrl.toString());
 };

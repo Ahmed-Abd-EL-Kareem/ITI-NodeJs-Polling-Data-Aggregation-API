@@ -1,10 +1,27 @@
 const catchAsync = require('../utils/catchAsync')
 const User = require('./user.model')
 const AppError = require('../utils/appError')
+const APIFeatures = require('../utils/apiFeature')
 
 exports.getAllUsers = catchAsync(async (req, res) => {
-  const users = await User.find()
-  res.json({ status: 'success', count: users.length, data: users })
+  const features = new APIFeatures(User.find(), req.query)
+    .filter()
+    .search(['name', 'email'])
+    .sort()
+    .limitFields()
+    .paginate()
+
+  const users = await features.query
+  const total = await features.countDocuments()
+
+  res.json({
+    status: 'success',
+    count: users.length,
+    total,
+    page: features.page,
+    totalPages: Math.ceil(total / features.limit),
+    data: users
+  })
 })
 
 exports.getUserById = catchAsync(async (req, res, next) => {

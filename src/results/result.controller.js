@@ -2,21 +2,18 @@ const Poll = require("../poll/poll.model.js")
 const Option = require("../options/options.model.js");
 const Vote = require("../votes/votes.model.js");
 const PollResult = require("./poll-results.model");
+const NodeCache = require("node-cache");
+const cron = require("node-cron");
 
-exports.getResults = async (req, res) => {
+const statsCache = new NodeCache({ stdTTL: 300 });
+
+const computeGlobalStats = async () => {
   try {
-    // >>> total polls >>>
     const totalPolls = await Poll.countDocuments();
-
-    // >>>> total votes >>>>
     const totalVotes = await Vote.countDocuments();
 
-    // >>> aggregation: find the poll with the highest number of votes 
     const mostPopularPollAgg = await Vote.aggregate([
-      {
-        $group:
-          { _id: "$pollId", votes: { $sum: 1 } }
-      },
+      { $group: { _id: "$pollId", votes: { $sum: 1 } } },
       { $sort: { votes: -1 } },
       { $limit: 1 }
     ]);
@@ -24,19 +21,17 @@ exports.getResults = async (req, res) => {
     let mostPopularPoll = null;
     if (mostPopularPollAgg.length > 0) {
       const poll = await Poll.findById(mostPopularPollAgg[0]._id);
-      mostPopularPoll = {
-        pollId: poll._id,
-        title: poll.title,
-        votes: mostPopularPollAgg[0].votes
-      };
+      if (poll) {
+        mostPopularPoll = {
+          pollId: poll._id,
+          title: poll.title,
+          votes: mostPopularPollAgg[0].votes
+        };
+      }
     }
 
-    //  aggregation: find the option with the highest number of votes
     const mostVotedOptionAgg = await Vote.aggregate([
-      {
-        $group:
-          { _id: "$optionId", votes: { $sum: 1 } }
-      },
+      { $group: { _id: "$optionId", votes: { $sum: 1 } } },
       { $sort: { votes: -1 } },
       { $limit: 1 }
     ]);
@@ -44,24 +39,45 @@ exports.getResults = async (req, res) => {
     let mostVotedOption = null;
     if (mostVotedOptionAgg.length > 0) {
       const option = await Option.findById(mostVotedOptionAgg[0]._id);
-      mostVotedOption = {
-        optionId: option._id,
-        optionText: option.text,
-        votes: mostVotedOptionAgg[0].votes
-      };
+      if (option) {
+        mostVotedOption = {
+          optionId: option._id,
+          optionText: option.text,
+          votes: mostVotedOptionAgg[0].votes
+        };
+      }
     }
 
-    //  Response
+    const statsData = {
+      totalPolls,
+      totalVotes,
+      mostPopularPoll,
+      mostVotedOption
+    };
+
+    statsCache.set("globalStats", statsData);
+  } catch (err) {
+    console.error("CRON ERROR - computeGlobalStats:", err);
+  }
+};
+
+// Update global stats every 5 minutes
+cron.schedule("*/5 * * * *", computeGlobalStats);
+
+exports.getResults = async (req, res) => {
+  try {
+    let data = statsCache.get("globalStats");
+    
+    // If cache is empty (server just started), compute it immediately
+    if (!data) {
+      await computeGlobalStats();
+      data = statsCache.get("globalStats") || {};
+    }
+
     res.json({
       status: "success",
-      data: {
-        totalPolls,
-        totalVotes,
-        mostPopularPoll,
-        mostVotedOption
-      }
+      data
     });
-
   } catch (err) {
     console.error(err);
     res.status(500).json({ status: "error", message: "Server error" });
@@ -74,6 +90,28 @@ exports.getPollResults = async (req, res) => {
     const { pollId } = req.params;
     const poll = await Poll.findById(pollId);
     if (!poll) return res.status(404).json({ status: "error", message: "Poll not found" });
+
+    const pollEnded = new Date(poll.expiresAt) < new Date();
+    let userVote = null;
+    if (req.user) {
+      userVote = await Vote.findOne({ userId: req.user._id, pollId: poll._id }).lean();
+    }
+    const hasVoted = Boolean(userVote);
+
+    // Logged-in users who have not voted yet cannot see tallies until they vote (or poll ends).
+    if (req.user && !hasVoted && !pollEnded) {
+      return res.json({
+        status: "success",
+        data: {
+          pollId: poll._id,
+          pollTitle: poll.title,
+          hasVoted: false,
+          userVotedOptionId: null,
+          totalVotes: null,
+          results: null,
+        },
+      });
+    }
 
     const pollResult = await PollResult.findOne({ pollId: poll._id });
 
@@ -127,6 +165,8 @@ exports.getPollResults = async (req, res) => {
         data: {
           pollId: poll._id,
           pollTitle: poll.title,
+          hasVoted,
+          userVotedOptionId: userVote?.optionId ?? null,
           totalVotes,
           results,
         },
@@ -180,6 +220,8 @@ exports.getPollResults = async (req, res) => {
       data: {
         pollId: poll._id,
         pollTitle: poll.title,
+        hasVoted,
+        userVotedOptionId: userVote?.optionId ?? null,
         totalVotes,
         results,
       },
