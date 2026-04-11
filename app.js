@@ -35,7 +35,7 @@ if (process.env.NODE_ENV.trim() === "development") {
   app.use(morgan("dev"));
 }
 app.use(cors({
-  origin: 'http://localhost:5173',
+  origin: ['http://localhost:5173','https://polling-data-aggregation-api-front.vercel.app/'],
   credentials: true,
 }))
 app.use(express.json())
