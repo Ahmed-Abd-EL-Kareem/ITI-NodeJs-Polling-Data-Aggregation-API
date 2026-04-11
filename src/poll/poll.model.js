@@ -6,6 +6,7 @@ const pollSchema = new mongoose.Schema({
     required: true,
   },
   description: String,
+  coverImage: String,
   createdBy: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
