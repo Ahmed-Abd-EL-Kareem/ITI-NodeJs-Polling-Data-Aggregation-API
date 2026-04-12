@@ -25,6 +25,30 @@ const getPolls = catchAsync(async (req, res, next) => {
   });
 });
 
+// Get polls by user ID
+const getPollsByUser = catchAsync(async (req, res, next) => {
+  const features = new APIFeatures(
+    Poll.find({ createdBy: req.params.userId }),
+    req.query
+  )
+    .filter()
+    .sort()
+    .limitFields()
+    .paginate();
+
+  const polls = await features.query.populate("createdBy");
+  const total = await features.countDocuments();
+
+  res.json({
+    message: "success",
+    count: polls.length,
+    total,
+    page: features.page,
+    totalPages: Math.ceil(total / features.limit) || 1,
+    data: polls
+  });
+});
+
 // Create poll
 const createPoll = catchAsync(async (req, res, next) => {
   const { title, description, expiresAt } = req.body;
@@ -115,6 +139,7 @@ const deletePoll = catchAsync(async (req, res, next) => {
 module.exports = {
   createPoll,
   getPolls,
+  getPollsByUser,
   getPoll,
   updatePoll,
   deletePoll

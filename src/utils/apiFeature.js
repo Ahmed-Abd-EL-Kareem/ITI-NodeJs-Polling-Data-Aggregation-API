@@ -4,7 +4,7 @@ class APIFeatures {
     this.queryString = queryString
     this.filterQuery = {}
     this.page = 1
-    this.limit = 10
+    this.limit = 12
   }
 
   filter() {
