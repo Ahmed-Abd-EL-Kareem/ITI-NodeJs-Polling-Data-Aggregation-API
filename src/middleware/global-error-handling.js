@@ -1,8 +1,15 @@
+const AppError = require('../utils/appError');
+
+const handleDuplicateFieldsDB = (err) => {
+  const field = Object.keys(err.keyValue)[0];
+  const message = `The ${field} is already in use. Please use another value!`;
+  return new AppError(message, 400);
+};
 
 const sendErrorDev = (err, req, res) => {
-  // API
   console.error("ERROR 💥💥💥: ", err);
-  if (req.originalUrl.startsWith("/api")) {
+  // Send response for both /api and /auth routes
+  if (req.originalUrl.startsWith("/api") || req.originalUrl.startsWith("/auth")) {
     return res.status(err.statusCode).json({
       status: err.status,
       error: err,
@@ -13,7 +20,12 @@ const sendErrorDev = (err, req, res) => {
 }
 
 module.exports = (err, req, res, next) => {
-  err.statusCode = err.statusCode || 500;
-  err.status = err.status || "Error";
-  sendErrorDev(err, req, res);
+  let error = Object.assign(err, { message: err.message });
+
+  if (error.code === 11000) error = handleDuplicateFieldsDB(error);
+
+  error.statusCode = error.statusCode || 500;
+  error.status = error.status || "Error";
+  
+  sendErrorDev(error, req, res);
 }

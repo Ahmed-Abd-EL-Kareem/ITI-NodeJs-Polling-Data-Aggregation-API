@@ -2,7 +2,7 @@ const jwt = require('jsonwebtoken')
 const User = require('../user/user.model');
 const path = require('path')
 const ejs = require('ejs');
-const { sendEmail, sendMailTrap } = require('../config/mail');
+const { sendEmail, sendMailTrap, sendNodeMailer } = require('../config/mail');
 const catchAsync = require('../utils/catchAsync');
 const { forgotPassword } = require('./forget-password.service');
 const { resetPassword } = require('./reset-password');
@@ -50,7 +50,12 @@ exports.register = catchAsync(async (req, res, next) => {
     //   subject: 'Welcome to Our Platform 🎉',
     //   html,
     // });
-    await sendMailTrap({
+    // await sendMailTrap({
+    //   to: user.email,
+    //   subject: 'Welcome to Our Platform 🎉',
+    //   html,
+    // });
+    await sendNodeMailer({
       to: user.email,
       subject: 'Welcome to Our Platform 🎉',
       html,
@@ -105,7 +110,7 @@ exports.login = catchAsync(async (req, res, next) => {
 
 
 exports.forgotUserPassword = catchAsync(async (req, res) => {
-  await forgotPassword(req.body.email)
+  await forgotPassword(req.body.email, req)
   res.status(200).json({
     status: 'success',
     message: 'Reset email sent',
